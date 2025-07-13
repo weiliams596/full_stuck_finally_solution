@@ -1,0 +1,20 @@
+{
+  "name": "makereactandservertestsol",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "make-react-app":"npm create vite@latest frontend -- --template react && cd frontend && npm i react-router-dom axios && node ../configerFrontend.js && cd ..",
+    "make-server-app":"mkdir backend && cd backend && npm init -y && npm i express cors pg jsonwebtoken dotenv nodemon bcrypt && node ../configerBackend.js && npm run makeServerDirectory && cd .. ",
+    "shower":"echo 'All done!\nYou can type(in terminal):\nnpm run build-and-run to build and run the app.\nOr npm run build-and-dev to build and run the app in development mode.'",
+    "init": "npm run make-react-app && npm run make-server-app && npm run shower",
+    "init-and-run":"npm run init && npm run build-and-run",
+    "init-and-dev":"npm run init && npm run build-and-dev",
+    "build-and-run":"cd frontend && npm run build && cd .. && cd backend && npm run start",
+    "build-and-dev":"cd frontend && npm run build && cd .. && cd backend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
