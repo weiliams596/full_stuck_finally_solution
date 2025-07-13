@@ -1,5 +1,6 @@
 const {DataTypes} = require('sequelize');
 const sequelize = require('../../configer');
+const LessonContent = require('./lessonContent');
 
 const Lessons = sequelize.define('Lessons', {
     id:{
@@ -15,16 +16,21 @@ const Lessons = sequelize.define('Lessons', {
         type:DataTypes.STRING,
         allowNull:false,
     },
-    content:{
-        type:DataTypes.TEXT,
-        allowNull:false,
-    },
     status:{
         type: DataTypes.ENUM('active', 'inactive','deleted'),
         allowNull: false,
     },
     price:{
         type:DataTypes.FLOAT,
+        defaultValue:0.0,
+        allowNull:false,
+    },
+    image:{
+        type:DataTypes.STRING,
+        allowNull:true,
+    },
+    order:{
+        type:DataTypes.INTEGER,
         allowNull:false,
     },
     created_at:{
@@ -43,6 +49,15 @@ const Lessons = sequelize.define('Lessons', {
     }
 },{
     tableName: 'lessons',
+});
+
+LessonContent.belongsTo(Lessons, {
+    foreignKey: 'lesson_id'
+});
+Lessons.hasMany(LessonContent, {
+    foreignKey: 'lesson_id',
+    onDelete: 'CASCADE',
+    onUpdate:'CASCADE'
 });
 
 module.exports = Lessons;

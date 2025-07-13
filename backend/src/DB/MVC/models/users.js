@@ -44,6 +44,7 @@ const Users = sequelize.define('Users', {
     },
     status:{
         type: DataTypes.ENUM('active', 'inactive','deleted'),
+        defaultValue: 'inactive',
         allowNull: false,
     },
     created_at:{

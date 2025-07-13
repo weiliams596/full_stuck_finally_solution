@@ -16,10 +16,6 @@ const Teachers = sequelize.define('Teachers', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    status: {
-        type: DataTypes.ENUM('active', 'inactive', 'deleted'),
-        allowNull: false
-    },
     created_at: {
         type: DataTypes.DATE,
         allowNull: false
