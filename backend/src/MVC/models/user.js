@@ -22,9 +22,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         user_type: {
-            type: DataTypes.ENUM('doctor', 'iller', 'admin'),
+            type: DataTypes.ENUM('doctor', 'iller', 'admin','null'),
             allowNull: false,
-            defaultValue:'iller'
+            defaultValue:'null'
         },
         status:{
             type: DataTypes.ENUM('active', 'inactive','deleted'),

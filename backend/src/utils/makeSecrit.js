@@ -1,0 +1,9 @@
+const bcrypt = require('bcrypt'); 
+
+const makeSecrit = (password) => {
+  const salt = bcrypt.genSaltSync(10);
+  const hash = bcrypt.hashSync(password, salt);
+  return hash;
+};
+
+console.log(makeSecrit('online_hospital'));

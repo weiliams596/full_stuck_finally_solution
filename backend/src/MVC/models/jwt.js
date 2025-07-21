@@ -2,15 +2,19 @@ const sequelize = require('../../DB/db');
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-    const DoctorWorkTimer = sequelize.define('DoctorWorkTimer', {
+    const jwt= sequelize.define('jwt_tokens', {
         id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
-        
+        jwt_token: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     }, {
-        tableName: 'doctor_work_timer'
+        tableName: 'jwt_tokens'
     });
-    return Queue;
+
+    return jwt;
 };

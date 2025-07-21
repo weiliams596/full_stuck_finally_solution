@@ -29,10 +29,13 @@ module.exports = (sequelize, DataTypes) => {
         models.User.hasOne(
             Doctor, {
             foreignKey: 'user_id',
-            onDelete: 'CASCADE'
+            onDelete: 'CASCADE',
+            onchanges: 'CASCADE'
         });
         Doctor.belongsTo(models.User, {
             foreignKey: 'user_id'
         });
     };
+
+    return Doctor;
 };
