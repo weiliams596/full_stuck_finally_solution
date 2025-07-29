@@ -1,4 +1,4 @@
-const sequelize = require('../../DB/db');
+const sequelize = require('../../Config/db');
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
@@ -29,5 +29,18 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'patient'
     });
+    
+    Patient.associate = models => {
+        models.User.hasOne(
+            Patient, {
+            foreignKey: 'user_id',
+            onDelete: 'CASCADE',
+            onchanges: 'CASCADE'
+        });
+        Patient.belongsTo(models.User, {
+            foreignKey: 'user_id'
+        });
+    };
+
     return Patient;
 };

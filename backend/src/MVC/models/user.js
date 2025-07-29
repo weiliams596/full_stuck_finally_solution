@@ -1,4 +1,4 @@
-const sequelize = require('../../DB/db');
+const sequelize = require('../../Config/db');
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
@@ -15,21 +15,29 @@ module.exports = (sequelize, DataTypes) => {
         email: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true
+            unique: true,
+            validate:{
+                isEmail:true
+            }
         },
         password: {
             type: DataTypes.STRING,
             allowNull: false
         },
-        user_type: {
+        role: {
             type: DataTypes.ENUM('doctor', 'iller', 'admin','null'),
             allowNull: false,
             defaultValue:'null'
         },
+        image:{
+            type:DataTypes.STRING,
+            allowNull:false,
+            defaultValue:'default.jpg'
+        },
         status:{
             type: DataTypes.ENUM('active', 'inactive','deleted'),
             allowNull: false,
-            defaultValue:'active'
+            defaultValue:'inactive'
         },
         created_at:{
             type: DataTypes.DATE,

@@ -1,4 +1,4 @@
-const bcrypt = require('bcrypt'); 
+const bcrypt = require('bcrypt');
 
 const makeSecrit = (password) => {
   const salt = bcrypt.genSaltSync(10);
@@ -7,3 +7,5 @@ const makeSecrit = (password) => {
 };
 
 console.log(makeSecrit('online_hospital'));
+
+module.exports = makeSecrit;

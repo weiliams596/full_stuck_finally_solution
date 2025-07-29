@@ -19,7 +19,7 @@ function errorResponse(statusCode, message = null, details = null, extras = {}) 
   return {
     status: statusCode,
     error: defaultMessagesKK[statusCode] || 'Белгісіз қате',
-    message: (message? '-:['+ message +']' : ''),
+    message: (message?  message : ''),
     ...(details ? { details } : {}),
     ...(Object.keys(extras).length ? extras : {}),
   };

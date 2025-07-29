@@ -1,4 +1,4 @@
-const sequelize = require('../../DB/db');
+const sequelize = require('../../Config/db');
 const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
@@ -17,9 +17,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true
         },
         work_status: {
-            type: DataTypes.ENUM('working', 'vocation', 'other'),
+            type: DataTypes.ENUM('working', 'vacation', 'other'),
             allowNull: false,
-            defaultValue: 'vocatoin'
+            defaultValue: 'vacation'
         }
     }, {
         tableName: 'doctors'
