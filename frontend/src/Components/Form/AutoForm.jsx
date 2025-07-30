@@ -17,6 +17,7 @@ import SetContext from "../Contexts/SetContexts/SetContext";
     - divCalassName: CSS class to apply to the field element
     - labelClassName: CSS class to apply to the label element
     - inputClassName: CSS class to apply to the input element
+    - onChange(value): callback function to handle field value change
   - onSuccess(response): callback async function to handle successful form submission
     - response: response object returned by API
   - onError: callback async function to handle form submission error
@@ -40,17 +41,25 @@ const AutoForm = ({
   title = "",
   titleClassName = "text-center text-3xl mb-5 mt-5 text-white",
   submitText = "Жыберу",
-  submitClassName = "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-4",
+  submitClassName = "bg-quaternary-blue hover:bg-secondary-blue text-white font-bold py-2 px-4 rounded-full mt-4",
   submitAndResetAll = false,
   otherButtons,
-  id=null,
+  paramId = null,
 }) => {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState("");
   const { axiosInstance } = useContext(SetContext);
 
-  const handleChnage = (name, value) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChnage = async (name, value, onChange) => {
+    try {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      console.log(name, value);
+      if (name === "role") {
+        const { isValid } = await onChange?.(value);
+      }
+    } catch (err) {
+      setErrors(err);
+    }
   };
   const handleReset = () => {
     document.forms[0].reset();
@@ -62,13 +71,12 @@ const AutoForm = ({
     try {
       const config = { method: methon, url: action, data: formData };
       if (methon.toUpperCase() === "GET" || methon.toUpperCase() === "DELETE") {
-        config.params = {...id,...formData};
+        config.params = { ...{ parId: paramId }, ...formData };
       } else {
         config.data = formData;
       }
 
       const response = await axiosInstance(config);
-
       await onSuccess?.(response);
       if (submitAndResetAll) {
         handleReset();
@@ -111,11 +119,12 @@ const AutoForm = ({
         ({
           name,
           label,
-          type='text',
+          type = "text",
           placeholder = label,
           required = false,
           options,
           inputClasses = defaultInputClasses(),
+          onChange,
         }) => (
           <div key={name} className={inputClasses.divClassName}>
             {type !== "radio" && type !== "checkbox" && (
@@ -128,9 +137,10 @@ const AutoForm = ({
                 name={name}
                 value={formData[name]}
                 className={inputClasses.inputClassName}
-                onChange={(e) => handleChnage(name, e.target.value)}
+                onChange={async (e) =>
+                  handleChnage(name, e.target.value, onChange)
+                }
                 required={required}>
-                <option value="">{placeholder}</option>
                 {options.map((option, index) => (
                   <option key={index} value={option.value}>
                     {option.label}
@@ -142,7 +152,9 @@ const AutoForm = ({
                 name={name}
                 value={formData[name]}
                 className={inputClasses.inputClassName}
-                onChange={(e) => handleChnage(name, e.target.value)}
+                onChange={async (e) =>
+                  handleChnage(name, e.target.value, onChange)
+                }
                 required={required}
                 placeholder={placeholder}
               />
@@ -155,7 +167,9 @@ const AutoForm = ({
                       name={name}
                       value={option.value}
                       className={inputClasses.inputClassName}
-                      onChange={(e) => handleChnage(name, e.target.value)}
+                      onChange={async (e) =>
+                        handleChnage(name, e.target.value, onChange)
+                      }
                       required={required}
                     />
                     {option.label}
@@ -171,23 +185,26 @@ const AutoForm = ({
                       name={name}
                       value={option.value}
                       className={inputClasses.inputClassName}
-                      onChange={(e) => handleChnage(name, e.target.value)}
+                      onChange={async (e) =>
+                        handleChnage(name, e.target.value, onChange)
+                      }
                       required={required}
                     />
                     {option.label}
                   </label>
                 ))}
               </div>
-            ) :type==='other'?
-            (
-              {options}
-            ): (
+            ) : type === "other" ? (
+              <div>{options}</div>
+            ) : (
               <input
                 type={type}
                 name={name}
                 value={formData[name]}
                 className={inputClasses.inputClassName}
-                onChange={(e) => handleChnage(name, e.target.value)}
+                onChange={async (e) =>
+                  handleChnage(name, e.target.value, onChange)
+                }
                 required={required}
                 placeholder={placeholder}
               />
@@ -221,9 +238,10 @@ export default AutoForm;
 
 export const defaultInputClasses = () => {
   return {
-    divClassName: "mb-4 text-white flex flex-col w-full justify-center",
-    labelClassName: "p-2",
-    inputClassName: "p-2 bg-[#16348C] rounded-3xl focus:outline-none w-full",
+    divClassName: "text-white flex flex-col w-full justify-center md:mb-2",
+    labelClassName: "pt-2 md:p-4",
+    inputClassName:
+      "pl-3 pr-3 pt-1 pb-1 bg-primary-blue rounded-3xl focus:outline-none w-full",
   };
 };
 
@@ -238,7 +256,7 @@ export const makeInputClasses = (
 export const defaultButtonClasses = () => {
   return {
     className:
-      "flex flex-col items-center justify-center w-full max-w-md bg-[#4453A6] rounded-4xl p-8 shadow-md",
+      "flex flex-col items-center justify-center w-full max-w-md bg-quaternary-blue rounded-4xl p-8 shadow-md",
   };
 };
 

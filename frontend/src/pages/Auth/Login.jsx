@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 
 import AutoForm from "../../Components/Form/AutoForm";
 import AuthContext from "../../Components/Contexts/Auth/AuthContext";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const { auth, setAuth, token, setToken } = useContext(AuthContext);
@@ -32,14 +33,21 @@ export default function Login() {
       placeholder: "Құпия сөз",
       required: true,
     },
+    {
+      name:'other',
+      type:'other',
+      options:(
+        <p>Тіркелу жоқ ? <Link to="/register" className="text-quaternary-blue hover:text-secondary-blue">Тіркелу</Link></p>
+      )
+    }
   ];
 
   return (
     <div className="flex justify-center items-center h-full w-full bg-white">
       <AutoForm
         title="Тіркелу"
-        className="flex flex-col items-center justify-center w-full max-w-md bg-[#4453A6] rounded-4xl p-8 shadow-md"
-        action="/api/v1/login"
+        className="flex flex-col items-center justify-center w-full max-w-md bg-tertiary-blue rounded-4xl p-8 shadow-md"
+        action="/login"
         onError={handleOnError}
         onSuccess={handleOnSuccess}
         fields={fields}

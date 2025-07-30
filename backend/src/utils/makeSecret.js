@@ -1,11 +1,11 @@
 const bcrypt = require('bcrypt');
 
-const makeSecrit = (password) => {
+const makeSecret = (password) => {
   const salt = bcrypt.genSaltSync(10);
   const hash = bcrypt.hashSync(password, salt);
   return hash;
 };
 
-console.log(makeSecrit('online_hospital'));
+console.log(makeSecret('online_hospital'));
 
-module.exports = makeSecrit;
+module.exports = makeSecret;

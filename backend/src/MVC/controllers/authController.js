@@ -3,10 +3,12 @@ const bcrypt = require('bcrypt');
 const { User } = require('../models/index');
 
 const errorResponse = require('../../utils/errorResponse');
-const makeSecrit = require('../../utils/makeSecrit');
+const makeSecret = require('../../utils/makeSecret');
 const { makeToken, verifyToken } = require('../../utils/tokenTools');
 const JoiSchema = require('../../utils/joiSchemaFunc');
 
+let hashCode = "";
+let timerIntralHandle = null;
 
 const authController = {
     async register(req, res) {
@@ -26,7 +28,7 @@ const authController = {
             let obj = {};
             for (let i = 0; i < keys.length; i++) {
                 if (keys[i] === "password") {
-                    obj[keys[i]] = makeSecrit(values[i]);
+                    obj[keys[i]] = makeSecret(values[i]);
                     continue;
                 } else if (keys[i] === "confirmPassword") {
                     continue;
@@ -58,16 +60,12 @@ const authController = {
             if (user.status === 'deleted') {
                 return res.status(404).json(errorResponse(404, `${email} жойылған!`));
             }
-            if (user.status === 'inactive') {
-                user.status = 'active';
-                await user.save();
-            }
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
                 return res.status(400).json(errorResponse(400, 'Құпия сөз қате!'));
             }
-            const { value:refreshValue, option:refreshOption } = makeToken({ id: user.id, role: user.role }, '7d');
-            const { value:accessValue, option:accessOption } = makeToken({ myServer: 'web' }, '20m');
+            const { value: refreshValue, option: refreshOption } = makeToken({ id: user.id, role: user.role }, '7d');
+            const { value: accessValue, option: accessOption } = makeToken({ myServer: 'web' }, '20m');
             res.header('Authorization', `Bearer ${accessValue}`);
             res.cookie('refresh_token', refreshValue, refreshOption);
             res.cookie('access_token', accessValue, accessOption);
@@ -77,6 +75,7 @@ const authController = {
                     id: user.id,
                     username: user.username,
                     role: user.role,
+                    status: user.status,
                 },
             });
         } catch (err) {
@@ -86,7 +85,13 @@ const authController = {
     },
     async refreshToken(req, res) {
         try {
-            const frontend_token = req.headers['Authorization'];
+            const frontend_token = req.headers.authorization.split(' ')[1];
+            console.log(req.headers);
+
+            const frontDecoded = verifyToken(frontend_token);
+            if (frontDecoded.myServer !== 'web') {
+                return res.status(401).json(errorResponse(401, 'Сізде құық жоқ!'));
+            }
             const { refresh_token } = req.cookies;
             if (!refresh_token) {
                 return res.status(401).json(errorResponse(401, 'Тіркелмеген!'));
@@ -100,11 +105,11 @@ const authController = {
             if (user.status === 'deleted') {
                 return res.status(404).json(errorResponse(404, 'Қолданушы жойылған!'));
             }
-            const { accessValue, accessOption } = makeToken({ myServer: 'web' }, '20m');
-            res.header('Authorization', `Bearer ${accessValue.value}`);
+            const { value: accessValue, option: accessOption } = makeToken({ myServer: 'web' }, '20m');
+            res.header('Authorization', `Bearer ${accessValue}`);
             res.cookie('access_token', accessValue, accessOption);
             return res.status(200).json({
-                message: 'Refresh token қате!',
+                message: 'Refresh token сәтті!',
                 user: {
                     id: user.id,
                     username: user.username,
@@ -116,10 +121,38 @@ const authController = {
             return res.status(500).json(errorResponse(500, err.message));
         }
     },
+    async admincode(req, res) {
+        try {
+            const { userInsert } = req.apiQuery;
+            if (userInsert!=='test') {
+                res.status(200).json({ isValid: userInsert == hashCode });
+                return hashCode = '';
+            }
+            else {
+                if (hashCode == '') {
+                    hashCode = makeSecret('admin');
+                    if (timerIntralHandle)
+                        clearInterval(timerIntralHandle);
+                    timerIntralHandle = setInterval(() => {
+                        hashCode = '';
+                        clearInterval(timerIntralHandle);
+                    }, 15 * 60 * 1000);
+                }
+                console.log('admin code:', hashCode);
+                return res.status(200).json({ message: 'Администратор код жасалды! 15 минут уақыт күшке ие!' })
+            }
+        } catch (err) {
+            console.log(err);
+            return res.status(500).json(errorResponse(500, err.message));
+        }
+    },
     async logout(req, res) {
         try {
-            req.cookie.access_token = '';
-            req.cookie.refresh_token = '';
+            if (req.session) {
+                req.session.destroy();
+            }
+            res.clearCookie('access_token');
+            res.clearCookie('refresh_token');
             return res.status(200).json({ message: 'Сәтті шықтыңыз!' });
         } catch (e) {
             return res.status(500).json(errorResponse(500, 'Жүйеден шығу шақыру қатеболды!'));

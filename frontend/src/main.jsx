@@ -6,6 +6,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import AutherProvider from "./Components/Contexts/Auth/AutherProvider.jsx";
 import SetProvider from "./Components/Contexts/SetContexts/SetProvider.jsx";
 
+
 createRoot(document.getElementById("root")).render(
   <Router>
     <AutherProvider>

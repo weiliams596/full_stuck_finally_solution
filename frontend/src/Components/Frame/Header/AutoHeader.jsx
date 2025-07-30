@@ -23,8 +23,8 @@ export default function Header({
   )
 }
 
-export const defaultHeaderClassName = 'bg-[#324580] text-white py-4 px-4 flex justify-between items-center';
+export const defaultHeaderClassName = 'flex pt-8 justify-around items-center text-white';
 
-export const defaultFiledTextCalssName = 'text-white hover:text-[#4B68BF] hover:underline';
+export const defaultFiledTextCalssName = 'text-white hover:text-quaternary-blue hover:underline';
 
 export const defaultFiledDomClassName = `${defaultFiledTextCalssName} flex items-center justify-center`;

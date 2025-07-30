@@ -5,9 +5,11 @@ import logo from "../assets/react.svg";
 import SetContext from "../Components/Contexts/SetContexts/SetContext";
 
 import AutoHeader from "../Components/Frame/Header/AutoHeader";
+import AutoFooter from "../Components/Frame/Footer/AutoFooter";
+import GridDom from "../Components/GridDom/GridDom";
 
 export default function TestPage({ children }) {
-  const { setHder } = useContext(SetContext);
+  const { setHeaderDom, setFooterDom } = useContext(SetContext);
   const headerFields = [
     {
       to: "/",
@@ -24,8 +26,16 @@ export default function TestPage({ children }) {
   ];
 
   useEffect(() => {
-    setHder(<AutoHeader fields={headerFields} />);
-    return setHder(null);
+    setHeaderDom(<AutoHeader fields={headerFields} />);
+    setFooterDom(<AutoFooter>footer</AutoFooter>);
+    return () => {
+      setHeaderDom(null);
+      setFooterDom(null);
+    };
   }, []);
-  return <div></div>;
+  return <GridDom col={3} row={1} gap="20px">
+    <div>a</div>
+    <div>b</div>
+    <div>c</div>
+  </GridDom>;
 }

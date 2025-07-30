@@ -31,7 +31,7 @@ app.use('/api-docs', swaggerui.serve, swaggerui.setup(swaggerJsdoc));
 app.use('/api/v1', authRouter);
 
 app.listen(port, () => {
-  sequelize.sync({ force: true }).then(() => {
+  sequelize.sync(/*{ force: true }*/).then(() => {
     console.log('Database synced');
   });
   console.log(`Server is running on port ${port}`);

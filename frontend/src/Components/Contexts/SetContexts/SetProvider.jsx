@@ -6,12 +6,13 @@ import AuthContext from "../Auth/AuthContext";
 axios.defaults.withCredentials = true;
 
 export default function AutherProvider({ children }) {
-  const [hder, setHder] = React.useState(null);
+  const [headerDom, setHeaderDom] = React.useState(null);
+  const [footerDom, setFooterDom] = React.useState(null);
   const { token } = React.useContext(AuthContext);
   const axiosInstance = axios.create({
     baseURL: `${import.meta.env.VITE_BASE_URL}:${
       import.meta.env.VITE_SERVER_PORT
-    }`,
+    }${import.meta.env.VITE_BASE_API_PATH}`,
     timeout: 10000,
     withCredentials: true,
     headers: {
@@ -20,8 +21,22 @@ export default function AutherProvider({ children }) {
     },
   });
 
+  axiosInstance.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
   return (
-    <SetContext.Provider value={{ axiosInstance, setHder, hder }}>
+    <SetContext.Provider
+      value={{
+        axiosInstance,
+        setHeaderDom,
+        headerDom,
+        setFooterDom,
+        footerDom,
+      }}>
       {children}
     </SetContext.Provider>
   );

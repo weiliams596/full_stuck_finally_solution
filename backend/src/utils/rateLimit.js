@@ -2,7 +2,7 @@ const rateLimit = require("express-rate-limit");
 
 /*
     1. `maxRequests` - Maximum number of requests allowed in the time window.
-    2. `timeWindow` - Time window in minutes for which the limit is applied.
+    2. `timeWindow` - Time window in minutes for which the limit is applied.(in seconds)
 
  */
 

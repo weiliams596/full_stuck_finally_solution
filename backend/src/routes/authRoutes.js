@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../MVC/controllers/authController');
 const frontendQuery = require('../middleware/frontendQuery');
+const rateLimit = require('../utils/rateLimit');
 
 router.use(frontendQuery);
 /**
@@ -13,7 +14,7 @@ router.use(frontendQuery);
 
 /**
  * @swagger
- * /auth/register:
+ * /register:
  *   post:
  *     summary: Қолданушыны тіркеу
  *     tags: [Auth]
@@ -38,11 +39,11 @@ router.use(frontendQuery);
  *       200:
  *         description: Тіркеу сәтті өтті
  */
-router.post('/register', authController.register);
+router.post('/register', rateLimit(5, 60), authController.register);
 
 /**
  * @swagger
- * /auth/login:
+ * /login:
  *   post:
  *     summary: Қолданушы жүйеге кіреді
  *     tags: [Auth]
@@ -64,11 +65,11 @@ router.post('/register', authController.register);
  *       200:
  *         description: Кіру сәтті өтті
  */
-router.post('/login', authController.login);
+router.post('/login', rateLimit(5, 60), authController.login);
 
 /**
  * @swagger
- * /auth/refresh-token:
+ * /refresh-token:
  *   post:
  *     summary: Токенді жаңарту
  *     tags: [Auth]
@@ -87,11 +88,28 @@ router.post('/login', authController.login);
  *       200:
  *         description: Жаңарту сәтті өтті
  */
-router.post('/refresh-token', authController.refreshToken);
+router.post('/refresh-token', rateLimit(20, 60 * 20), authController.refreshToken);
 
 /**
  * @swagger
- * /auth/logout:
+ * /admincode:
+ *     summary: Адміністратор кодын көру
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Жаңарту сәтті өтті
+ */
+router.post('/admincode', rateLimit(20, 60 * 20), authController.admincode);
+
+/**
+ * @swagger
+ * /logout:
  *   post:
  *     summary: Қолданушыны шығару
  *     tags: [Auth]
@@ -108,6 +126,6 @@ router.post('/refresh-token', authController.refreshToken);
  *       200:
  *         description: Шығару сәтті өтті
  */
-router.post('/logout', authController.logout);
+router.post('/logout',rateLimit(1, 60 * 20), authController.logout);
 
 module.exports = router;
