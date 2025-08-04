@@ -3,13 +3,15 @@ const router = express.Router();
 const authController = require('../MVC/controllers/authController');
 const frontendQuery = require('../middleware/frontendQuery');
 const rateLimit = require('../utils/rateLimit');
+const authorization = require('../middleware/authorization');
 
 router.use(frontendQuery);
 /**
  * @swagger
  * tags:
  *   name: Auth
- *   description: Қолданушыға қатысты API
+ *   description: Қолданушыға қатысты API(Бәрлық paramaters,body,query лар, backend ға бір обек боп құралады)
+ * 
  */
 
 /**
@@ -114,18 +116,32 @@ router.post('/admincode', rateLimit(20, 60 * 20), authController.admincode);
  *     summary: Қолданушыны шығару
  *     tags: [Auth]
  *     requestBody:
- *       required: false
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               token:
- *                 type: string
+ *               id:
+ *                 type: number
  *     responses:
  *       200:
  *         description: Шығару сәтті өтті
  */
-router.post('/logout',rateLimit(1, 60 * 20), authController.logout);
+router.post('/logout', rateLimit(1, 60 * 20), authController.logout);
+
+/**
+ * @swagger
+ * /active-user:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Активациялау
+ *     description: Активациялау үшін қолданушының активсін жасау
+ *     operationId: activeUser
+ */
+router.post('/active-user', rateLimit(100, 60), authController.activeUser);
+
+
+router.get('/inactive-users', rateLimit(100, 60), authController.getInactiveUsers);
 
 module.exports = router;

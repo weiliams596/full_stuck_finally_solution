@@ -3,18 +3,42 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
     const Comment = sequelize.define('Comment', {
-        id:{
+        id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
         },
+        author_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'patients',
+                key: 'id'
+            },
+        },
+        doctor_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'doctors',
+                key: 'id'
+            }
+        },
+        real_time_queue_id:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'real_time_queue',
+                key: 'id'
+            }
+        },
         comment: {
-            type: DataTypes.STRING,
+            type: DataTypes.TEXT,
             allowNull: false
         },
-        comment_point:{
+        comment_point: {
             type: DataTypes.INTEGER,
-            validators: {
+            validate: {
                 isInt: {
                     msg: "Comment point must be an integer"
                 },
@@ -23,36 +47,53 @@ module.exports = (sequelize, DataTypes) => {
             },
             allowNull: false
         },
-        status:{
-            type: DataTypes.ENUM('active','deleted'),
+        status: {
+            type: DataTypes.ENUM('active', 'deleted'),
             allowNull: false,
             defaultValue: 'active'
         },
-        created_at: {
+        deleted_at: {
             type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-        },
-        updated_at: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
+            allowNull: true,
+            defaultValue: null
         }
     }, {
-        tableName: 'comment'
+        tableName: 'comments'
     });
 
-    Comment.associate = (models)=>{
-        Comment.belongsTo(models.Patient,{
-            foreignKey:'author_id',
+    Comment.associate = (models) => {
+        Comment.belongsTo(models.Patient, {
+            foreignKey: 'author_id',
             onDelete: 'SET NULL',
-            onUpdate:'CASCADE'
+            onUpdate: 'CASCADE'
         });
-        Comment.belongsTo(models.Doctor,{
-            foreignKey:'doctor_id',
-            onDelete:'CASCADE',
-            onUpdate:'CASCADE'
+        Comment.belongsTo(models.Doctor, {
+            foreignKey: 'doctor_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+        Comment.belongsTo(models.RealTimeQueue, {
+            foreignKey:'real_time_queue_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
         });
     };
     return Comment;
 };
+
+/**
+ *const Doctor = require('./models/Doctor');
+const Comment = require('./models/Comment');
+
+const doctors = await Doctor.findAll({
+  include: [{
+    model: Comment,
+    attributes: ['comment', 'comment_point', 'status'],
+    include: [{
+      model: User,
+      attributes: [['name','author_name']] // 根据你的 Patient 模型字段选择
+    }]
+  }]
+});
+
+ */

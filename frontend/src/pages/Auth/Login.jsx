@@ -1,17 +1,25 @@
-import React, { useContext } from "react";
+import React, { use, useContext ,useEffect} from "react";
 
 import AutoForm from "../../Components/Form/AutoForm";
 import AuthContext from "../../Components/Contexts/Auth/AuthContext";
+import SetContext from "../../Components/Contexts/SetContexts/SetContext";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+/**
+ * This is Login page component.
+ * @returns {JSX.Element}
+ */
 
 export default function Login() {
   const { auth, setAuth, token, setToken } = useContext(AuthContext);
+  const {setHeaderDom,setFooterDom} = useContext(SetContext);
+  const navigate = useNavigate();
   const handleOnSuccess = async (response) => {
-    console.log(response);
     setAuth(await response.data.user);
     console.log(auth);
     setToken(response.headers.authorization.split(" ")[1]);
-    console.log(token);
+    navigate("/");
   };
 
   const handleOnError = async (error) => {
@@ -42,6 +50,10 @@ export default function Login() {
     }
   ];
 
+  useEffect(() => {
+    setHeaderDom(null);
+    setFooterDom(null);
+  },[]);
   return (
     <div className="flex justify-center items-center h-full w-full bg-white">
       <AutoForm

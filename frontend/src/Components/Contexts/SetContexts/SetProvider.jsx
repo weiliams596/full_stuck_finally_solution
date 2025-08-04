@@ -8,11 +8,11 @@ axios.defaults.withCredentials = true;
 export default function AutherProvider({ children }) {
   const [headerDom, setHeaderDom] = React.useState(null);
   const [footerDom, setFooterDom] = React.useState(null);
+  const [otherData, setOtherData] = React.useState(null);
   const { token } = React.useContext(AuthContext);
+  console.log(import.meta.env.VITE_BASE_API_PATH);
   const axiosInstance = axios.create({
-    baseURL: `${import.meta.env.VITE_BASE_URL}:${
-      import.meta.env.VITE_SERVER_PORT
-    }${import.meta.env.VITE_BASE_API_PATH}`,
+    baseURL: `${import.meta.env.VITE_BASE_API_PATH}`,
     timeout: 10000,
     withCredentials: true,
     headers: {
@@ -28,6 +28,16 @@ export default function AutherProvider({ children }) {
     }
     return config;
   });
+
+  React.useEffect(() => {
+    const other = JSON.parse(localStorage.getItem("other"));
+    if (other) setOtherData(other);
+  }, []);
+
+  React.useEffect(() => {
+    localStorage.setItem("other", JSON.stringify(otherData));
+  }, [otherData]);
+
   return (
     <SetContext.Provider
       value={{
@@ -36,6 +46,8 @@ export default function AutherProvider({ children }) {
         headerDom,
         setFooterDom,
         footerDom,
+        otherData,
+        setOtherData,
       }}>
       {children}
     </SetContext.Provider>

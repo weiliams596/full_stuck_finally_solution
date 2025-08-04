@@ -25,20 +25,32 @@ module.exports = (sequelize, DataTypes) => {
         phone:{
             type:DataTypes.STRING,
             allowNull:false
+        },
+        deleted_at:{
+            type:DataTypes.DATE,
+            allowNull:true,
+            defaultValue: null
         }
     }, {
-        tableName: 'patient'
+        tableName: 'patients',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
     
     Patient.associate = models => {
-        models.User.hasOne(
-            Patient, {
-            foreignKey: 'user_id',
-            onDelete: 'CASCADE',
-            onchanges: 'CASCADE'
-        });
         Patient.belongsTo(models.User, {
             foreignKey: 'user_id'
+        });
+        Patient.hasMany(models.Comment,{
+            foreignKey: 'patient_id',
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE'
+        });
+        Patient.hasMany(models.OnlineQueue,{
+            foreignKey: 'patient_id',
+            onUpdate: 'CASCADE',
+            onDelete: 'SET NULL'
         });
     };
 

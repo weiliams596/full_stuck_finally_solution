@@ -23,9 +23,17 @@ module.exports = (sequelize, DataTypes) => {
         description:{
             type: DataTypes.STRING,
             allowNull: false
+        },
+        deleted_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            defaultValue: null
         }
     }, {
-        tableName: 'hospitals'
+        tableName: 'hospitals',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
 
     Hospital.associate = (models) => {
@@ -33,9 +41,6 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'hospital_id',
             onDelete: 'SET NULL',
             onUpdate: 'CASCADE'
-        });
-        models.Doctor.belongsTo(Hospital, {
-            foreignKey: 'hospital_id'
         });
     };
 

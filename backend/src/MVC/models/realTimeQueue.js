@@ -8,6 +8,14 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        comment_id:{
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'comments',
+                key: 'id'
+            }
+        },
         queue_index:{
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -28,28 +36,25 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'waiting'
         },
-        queue_created_at:{
+        deleted_at:{
             type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-        },
-        queue_updated_at:{
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: sequelize.literal('CURRENT_TIMESTAMP')
-        },
+            allowNull: true,
+            defaultValue: null
+        }
     },{
-        tableName: 'RealTimeQueue',
+        tableName: 'real_time_queue',
         timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
 
     RealTimeQueue.associate = (models) => {
-        RealTimeQueue.belongsTo(models.Comment, {
+        RealTimeQueue.hasOne(models.Comment, {
             foreignKey: 'comment_id',
             onDelete: 'CASCADE',
             onUpdate: 'CASCADE',
         });
-
     };
     return RealTimeQueue;
 };
+

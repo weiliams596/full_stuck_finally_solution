@@ -1,13 +1,18 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AutoForm from "../../Components/Form/AutoForm";
 
 import SetContext from "../../Components/Contexts/SetContexts/SetContext";
 import axios from "axios";
 
+/**
+ * This is the register page component.
+ * @returns {JSX.Element}
+ */
+
 export default function Register() {
   const navigate = useNavigate();
-  const { axiosInstance } = useContext(SetContext);
+  const { axiosInstance, setHeaderDom, setFooterDom } = useContext(SetContext);
   const [fields, setFields] = useState([
     {
       name: "username",
@@ -40,6 +45,7 @@ export default function Register() {
     {
       name: "role",
       type: "select",
+      defaultValue: "iller",
       options: [
         { value: "doctor", label: "Емдеушы" },
         { value: "iller", label: "Наухас" },
@@ -47,20 +53,36 @@ export default function Register() {
       ],
       required: true,
       onChange: async (value) => {
-        console.log(value);
-        if (value.toLowerCase() == "admin") {
-          const test = await axiosInstance.post("/admincode", {
-            userInsert: "test",
-          });
-          if (test.status === 200 || test.status === 201) {
-            const userInsert = prompt("Серверден келген кодын енгізіңіз");
-            const response = await axiosInstance.post("/admincode", {
-              userInsert,
+        console.log("Input value:", value);
+        if (value.toLowerCase() === "admin") {
+          try {
+            const initResponse = await axiosInstance.post("/admincode", {
+              userInsert: "init",
             });
-            console.log(response.data);
-            return response.data;
+
+            if (initResponse.status === 200 || initResponse.status === 201) {
+              const userInsert =
+                prompt("Серверден келген кодын енгізіңіз").trim() ?? null;
+              if (!userInsert) throw new Error("Код енгізілмеді");
+
+              const verifyResponse = await axiosInstance.post("/admincode", {
+                userInsert,
+              });
+
+              if (
+                verifyResponse.status === 200 ||
+                verifyResponse.status === 201
+              ) {
+                return "admin";
+              } else {
+                throw new Error(verifyResponse?.data?.message || "Код қате");
+              }
+            }
+          } catch (err) {
+            throw err;
           }
         }
+        return value;
       },
     },
     {
@@ -84,12 +106,13 @@ export default function Register() {
   };
 
   const handleOnError = async (error) => {
-    if (error.response.status === 400) {
-      setTimeout(() => {
-        navigate("/login");
-      }, 2000);
-    }
+    console.log(error);
   };
+
+  useEffect(() => {
+    setHeaderDom(null);
+    setFooterDom(null);
+  }, []);
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-white">
       <AutoForm

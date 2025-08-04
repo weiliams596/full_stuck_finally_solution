@@ -11,6 +11,7 @@ import SetContext from "../Contexts/SetContexts/SetContext";
     - name: name of the field
     - label: label of the field
     - type: type of the field (default: text)
+    - defaultValue: used for select, radio and checkbox type fields to set default value
     - placeholder: placeholder text for the field
     - required: boolean to indicate if the field is required (default: false)
     - options: array of options to display in a dropdown field(use for select, radio and checkbox type fields)
@@ -23,6 +24,11 @@ import SetContext from "../Contexts/SetContexts/SetContext";
   - onError: callback async function to handle form submission error
     - err: error object returned by API
   - title: is dom element to display form title
+  - titleClassName: CSS class to apply to title element
+  - submitClassName: CSS class to apply to submit button element
+  - onSubmit(config): callback async function to handle form submission before sending to API
+    - config: config object to be sent to API
+  - submitAndResetAll: boolean to indicate if all fields should be reset after successful submission
   - submitText: text to display on submit button
   - otherButtons: array of objects containing other buttons details
     - text: text to display on button
@@ -30,6 +36,7 @@ import SetContext from "../Contexts/SetContexts/SetContext";
     - onClick(e,response): callback async function to handle button click event
       - e: event object
       - response: response object returned by API
+  - paramId: parameter to be sent to API (default: null,server will generate id name of parId)
 */
 const AutoForm = ({
   action,
@@ -43,22 +50,26 @@ const AutoForm = ({
   submitText = "Жыберу",
   submitClassName = "bg-quaternary-blue hover:bg-secondary-blue text-white font-bold py-2 px-4 rounded-full mt-4",
   submitAndResetAll = false,
-  otherButtons,
+  otherButtons = null,
   paramId = null,
 }) => {
   const [formData, setFormData] = useState({});
   const [errors, setErrors] = useState("");
   const { axiosInstance } = useContext(SetContext);
 
-  const handleChnage = async (name, value, onChange) => {
+  const handleChange = async (name, value, onChange) => {
     try {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      console.log(name, value);
-      if (name === "role") {
-        const { isValid } = await onChange?.(value);
-      }
+      const newValue = await onChange?.(value);
+      setFormData((prev) => ({
+        ...prev,
+        [name]: newValue ?? value,
+      }));
     } catch (err) {
-      setErrors(err);
+      const errorMessage =
+        err?.response?.data?.error + " : " + err?.response?.data?.message ||
+        err?.message ||
+        String(err);
+      setErrors(errorMessage);
     }
   };
   const handleReset = () => {
@@ -75,7 +86,6 @@ const AutoForm = ({
       } else {
         config.data = formData;
       }
-
       const response = await axiosInstance(config);
       await onSuccess?.(response);
       if (submitAndResetAll) {
@@ -91,8 +101,8 @@ const AutoForm = ({
     // e.preventDefault();
     try {
       const config = {
-        method: button.methon,
-        url: button.action,
+        method: button?.methon,
+        url: button?.action,
         data: formData,
       };
       if (methon.toUpperCase() === "GET" || methon.toUpperCase() === "DELETE") {
@@ -103,13 +113,13 @@ const AutoForm = ({
 
       const response = await axiosInstance(config);
 
-      await button.onSuccess?.(e, response);
+      await button?.onSuccess?.(e, response);
       if (submitAndResetAll) {
         handleReset();
       }
     } catch (err) {
       await onError?.(e, err);
-      setErrors(err.response.data.error + " : " + err.response.data.message);
+      setErrors(err.response?.data?.error + " : " + err.response?.data?.message);
     }
   };
   return (
@@ -120,6 +130,7 @@ const AutoForm = ({
           name,
           label,
           type = "text",
+          defaultValue,
           placeholder = label,
           required = false,
           options,
@@ -135,10 +146,10 @@ const AutoForm = ({
             {type === "select" ? (
               <select
                 name={name}
-                value={formData[name]}
+                value={formData[name] ?? defaultValue}
                 className={inputClasses.inputClassName}
                 onChange={async (e) =>
-                  handleChnage(name, e.target.value, onChange)
+                  handleChange(name, e.target.value, onChange && onChange)
                 }
                 required={required}>
                 {options.map((option, index) => (
@@ -153,7 +164,7 @@ const AutoForm = ({
                 value={formData[name]}
                 className={inputClasses.inputClassName}
                 onChange={async (e) =>
-                  handleChnage(name, e.target.value, onChange)
+                  handleChange(name, e.target.value, onChange && onChange)
                 }
                 required={required}
                 placeholder={placeholder}
@@ -168,7 +179,7 @@ const AutoForm = ({
                       value={option.value}
                       className={inputClasses.inputClassName}
                       onChange={async (e) =>
-                        handleChnage(name, e.target.value, onChange)
+                        handleChange(name, e.target.value, onChange && onChange)
                       }
                       required={required}
                     />
@@ -186,7 +197,7 @@ const AutoForm = ({
                       value={option.value}
                       className={inputClasses.inputClassName}
                       onChange={async (e) =>
-                        handleChnage(name, e.target.value, onChange)
+                        handleChange(name, e.target.value, onChange && onChange)
                       }
                       required={required}
                     />
@@ -200,10 +211,10 @@ const AutoForm = ({
               <input
                 type={type}
                 name={name}
-                value={formData[name]}
+                value={formData[name]?? ''}
                 className={inputClasses.inputClassName}
                 onChange={async (e) =>
-                  handleChnage(name, e.target.value, onChange)
+                  handleChange(name, e.target.value, onChange && onChange)
                 }
                 required={required}
                 placeholder={placeholder}

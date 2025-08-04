@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
     const User = sequelize.define('User', {
-        id:{
+        id: {
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true
@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
-            validate:{
-                isEmail:true
+            validate: {
+                isEmail: true
             }
         },
         password: {
@@ -25,36 +25,44 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         role: {
-            type: DataTypes.ENUM('doctor', 'iller', 'admin','null'),
+            type: DataTypes.ENUM('doctor', 'iller', 'admin'),
             allowNull: false,
-            defaultValue:'null'
+            defaultValue: 'iller'
         },
-        image:{
-            type:DataTypes.STRING,
-            allowNull:false,
-            defaultValue:'default.jpg'
-        },
-        status:{
-            type: DataTypes.ENUM('active', 'inactive','deleted'),
+        image: {
+            type: DataTypes.STRING,
             allowNull: false,
-            defaultValue:'inactive'
+            defaultValue: 'default.jpg'
         },
-        created_at:{
+        status: {
+            type: DataTypes.ENUM('active', 'inactive', 'deleted'),
+            allowNull: false,
+            defaultValue: 'inactive'
+        },
+        deleted_at: {
             type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        update_at:{
-            type: DataTypes.DATE,
-            allowNull: false,
-            defaultValue: DataTypes.NOW
-        },
-        deleted_at:{
-            type: DataTypes.DATE,
-            allowNull: true
+            allowNull: true,
+            defaultValue: null
         }
     }, {
-        tableName: 'users'
+        tableName: 'users',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
+
+    User.associate = (models) => {
+        User.hasOne(models.Doctor, {
+            foreignKey: 'user_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+        User.hasOne(
+            models.Patient, {
+            foreignKey: 'user_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+    }
     return User;
 };

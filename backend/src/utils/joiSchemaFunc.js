@@ -10,19 +10,16 @@ const userName = Joi.string().pattern(/^([a-zA-Z\u0400-\u04FF\u0456\u049B\u04AF\
     });
 
 const password = Joi.string().min(8).max(35).messages({
-    'string.base': 'Password түрінде енгізіңіз!',
-    'string.empty': 'Password бос қалтыруға болмайды!',
-    'string.min': 'Password ды 8 орынды цифрланған нан көп қылып жазу керек!',
-    'string.max': 'Password ды 35 орынды цифрланған азқылып жазу керек!',
-    'any.required': 'Password сөзсіз жазылуы керек!'
+    'string.base': 'Құпия сөз түрінде енгізіңіз!',
+    'string.empty': 'Құпия сөз бос қалтыруға болмайды!',
+    'string.min': 'Құпия сөз ды 8 орынды цифрланған нан көп қылып жазу керек!',
+    'string.max': 'Құпия сөз ды 35 орынды цифрланған азқылып жазу керек!',
+    'any.required': 'Құпия сөз сөзсіз жазылуы керек!'
 });
 
-const confirmPassword = Joi.string().min(8).max(35).messages({
-    'string.base': 'Confirm Password түрінде енгізіңіз!',
-    'string.empty': 'Confirm Password бос қалтыруға болмайды!',
-    'string.min': 'Confirm Password ды 8 орынды цифрланған нан көп қылып жазу керек!',
-    'string.max': 'Confirm Password ды 35 орынды цифрланған азқылып жазу керек!',
-    'any.required': 'Confirm Password сөзсіз жазылуы керек!'
+const confirmPassword = Joi.any().valid(Joi.ref('password')).required().messages({
+    'any.only': 'Құпия сөздер  қайталау  сәйкес келмейді',
+    'any.required': 'Құпия сөзді  қайталау  растау қажет',
 });
 
 const email = Joi.string().email().messages({
@@ -33,6 +30,36 @@ const email = Joi.string().email().messages({
     'any.required': 'Email сөзсіз жазылуы керек!'
 });
 
+const role = Joi.string().valid('admin', 'iller', 'doctor').messages({
+    'string.base': 'Role түрінде енгізіңіз!',
+    'string.empty': 'Role бос қалтыруға болмайды!',
+    'any.required': 'Role сөзсіз жазылуы керек!'
+});
+
+const comment_required = Joi.string().min(1).max(255).messages({
+    'string.base': 'Емхана түрінде енгізіңіз!',
+    'string.empty': 'Емхана бос қалтыруға болмайды!',
+    'string.min': 'Емхана ды 3 орынды таңбадан көп қылып жазу керек!',
+    'string.max': 'Емхана ды 50 орынды таңбадан азқылып жазу керек!',
+    'any.required': 'Емхана сөзсіз жазылуы керек!'
+}).required();
+
+const comment_point_required = Joi.string().min(5).max(255).messages({
+    'string.base': 'Емхана әдіріс түрінде енгізіңіз!',
+    'string.empty': 'Емхана әдіріс бос қалтыруға болмайды!',
+    'string.min': 'Емхана әдіріс ды 3 орынды таңбадан көп қылып жазу керек!',
+    'string.max': 'Емхана әдіріс ды 50 орынды таңбадан азқылып жазу керек!',
+    'any.required': 'Емхана әдіріс сөзсіз жазылуы керек!'
+}).required();
+
+const comment_status_required = Joi.string().valid('active', 'deleted').messages({
+    'string.base': 'Емхана әдіріс түрінде енгізіңіз!',
+    'string.empty': 'Емхана әдіріс бос қалтыруға болмайды!',
+    'string.min': 'Емхана әдіріс ды 3 орынды таңбадан көп қылып жазу керек!',
+    'string.max': 'Емхана әдіріс ды 50 орынды таңбадан азқылып жазу керек!',
+    'any.required': 'Емхана әдіріс сөзсіз жазылуы керек!'
+}).required();
+
 const userNameRequired = userName.required();
 const passwordRequired = password.required();
 const confirmPasswordRequired = confirmPassword.required();
@@ -42,7 +69,8 @@ const registerSchema = Joi.object({
     username: userNameRequired,
     password: passwordRequired,
     confirmPassword: confirmPasswordRequired,
-    email: emailRequired
+    email: emailRequired,
+    role: role.required()
 });
 
 
@@ -69,7 +97,10 @@ module.exports = {
         userNameRequired,
         passwordRequired,
         confirmPasswordRequired,
-        emailRequired
+        emailRequired,
+        comment_required,
+        comment_point_required,
+        comment_status_required,
     },
     registerSchema,
     loginSchema,

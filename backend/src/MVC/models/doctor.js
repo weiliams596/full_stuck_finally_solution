@@ -8,6 +8,22 @@ module.exports = (sequelize, DataTypes) => {
             primaryKey: true,
             autoIncrement: true
         },
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'users',
+                key: 'id'
+            }
+        },
+        hospital_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            references: {
+                model: 'hospitals',
+                key: 'id'
+            }
+        },
         description: {
             type: DataTypes.TEXT,
             allowNull: true
@@ -20,20 +36,38 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM('working', 'vacation', 'other'),
             allowNull: false,
             defaultValue: 'vacation'
+        },
+        deleted_at: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            defaultValue: null
         }
     }, {
-        tableName: 'doctors'
+        tableName: 'doctors',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at'
     });
 
     Doctor.associate = models => {
-        models.User.hasOne(
-            Doctor, {
-            foreignKey: 'user_id',
-            onDelete: 'CASCADE',
-            onchanges: 'CASCADE'
-        });
         Doctor.belongsTo(models.User, {
             foreignKey: 'user_id'
+        });
+        Doctor.belongsTo(models.Hospital, {
+            foreignKey: 'hospital_id',
+            onDelete: 'SET NULL',
+            onUpdate: 'CASCADE'
+
+        });
+        Doctor.hasMany(models.Comment, {
+            foreignKey: 'doctor_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
+        });
+        Doctor.hasMany(models.OnlineQueue, {
+            foreignKey: 'doctor_id',
+            onDelete: 'CASCADE',
+            onUpdate: 'CASCADE'
         });
     };
 

@@ -13,7 +13,7 @@ const swaggerJsdoc = require('./utils/swagger');
 const authRouter = require('./routes/authRoutes');
 
 const app = express();
-const port = process.env.PORT||3000;
+const port = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 app.use(express.json());
@@ -31,7 +31,7 @@ app.use('/api-docs', swaggerui.serve, swaggerui.setup(swaggerJsdoc));
 app.use('/api/v1', authRouter);
 
 app.listen(port, () => {
-  sequelize.sync(/*{ force: true }*/).then(() => {
+  sequelize.sync({ force: true ,alter: true }).then((sq) => {
     console.log('Database synced');
   });
   console.log(`Server is running on port ${port}`);

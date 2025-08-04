@@ -5,13 +5,13 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Documentation',
+    title: 'API Даукуметика',
       version: '1.0.0',
-      description: 'This is a sample server',
+      description: 'Емхана кезекке туруға қаттысты API даукуметика',
     },
     servers: [
       {
-        url: `http://localhost:${process.env.PORT}`,
+        url: `http://localhost:${process.env.PORT}/api/v1`,
       },
     ],
   },
