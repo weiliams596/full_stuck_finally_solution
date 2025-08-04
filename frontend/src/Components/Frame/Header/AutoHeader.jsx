@@ -29,7 +29,7 @@ export default function Header({
       return (
         <div className="flex flex-row justify-around items-center w-full h-full">
           {() => {
-            if (typeof fields === "array" && fields.length > 0) {
+            if ((fields.length > 0)) {
               fields.forEach((field) => {
                 if (field.to == "/") {
                   return (
@@ -84,10 +84,8 @@ export default function Header({
       {!shower && headerContent && headerContent}
       {shower && (
         <div className="flex flex-col justify-around h-[80vh] absolute top-0 right-[-20px] w-[25%] z-100 m-6 bg-tertiary-blue">
-          <button className="" onClick={() => setShower(false)}>
-            {" "}
-            X{" "}
-          </button>
+          <button className="" onClick={() => setShower(false)}>            
+            X          </button>
           {fields &&
             fields.map((field, index) => {
               return field.to !== "/" ? (
