@@ -11,8 +11,8 @@
     "init-with-tailwind":"npm run init && cd frontend && npm run useTailwindCss",
     "init-and-run":"npm run init && npm run build-and-run",
     "init-and-dev":"npm run init && npm run build-and-dev",
-    "build-and-run":"cd frontend && npm run build && cd .. && cd backend && npm run start",
-    "build-and-dev":"cd frontend && npm run build && cd .. && cd backend && npm run dev",
+    "build-and-run":"cd frontend && npm i && npm run build && cd .. && cd backend && npm run start",
+    "build-and-dev":"cd frontend && npm i && npm run build && cd .. && cd backend && npm run dev",
     "dev-double-mac":"cd frontend && open -a Terminal 'npm run dev' && cd ../backend && npm run dev",
     "dev-double-windows":"cd frontend && start cmd /k npm run dev && cd ../backend && npm run dev",
     "make-crit":"cd backend && node src/utils/makeSecrit.js"

@@ -5,6 +5,8 @@ import AutoForm from "../../Components/Form/AutoForm";
 import SetContext from "../../Components/Contexts/SetContexts/SetContext";
 import axios from "axios";
 
+import Prompt from "../../Components/Frame/Prompt/Prompt";
+
 /**
  * This is the register page component.
  * @returns {JSX.Element}
@@ -13,6 +15,7 @@ import axios from "axios";
 export default function Register() {
   const navigate = useNavigate();
   const { axiosInstance, setHeaderDom, setFooterDom } = useContext(SetContext);
+  const [myUserInsert, setMyUserInsert] = useState(null);
   const [fields, setFields] = useState([
     {
       name: "username",
@@ -53,33 +56,42 @@ export default function Register() {
       ],
       required: true,
       onChange: async (value) => {
-        console.log("Input value:", value);
         if (value.toLowerCase() === "admin") {
-          try {
-            const initResponse = await axiosInstance.post("/admincode", {
-              userInsert: "init",
-            });
+          const initResponse = await axiosInstance.post("/admincode", {
+            userInsert: "init",
+          });
 
-            if (initResponse.status === 200 || initResponse.status === 201) {
-              const userInsert =
-                prompt("Серверден келген кодын енгізіңіз").trim() ?? null;
-              if (!userInsert) throw new Error("Код енгізілмеді");
+          if (initResponse.status === 200 || initResponse.status === 201) {
+            setPrompt(
+              <Prompt
+                message="Администратор дың кодын енгізіңіз:"
+                OnClick={(value) => {
+                  setMyUserInsert(value);
+                }}
+                OnClosed={async (value) => {
+                  setPrompt(null);
+                  if (!myUserInsert) throw new Error("Код енгізілмеді");
+                  console.log("User insert:", myUserInsert);
+                  const verifyResponse = await axiosInstance.post(
+                    "/admincode",
+                    {
+                      userInsert: myUserInsert,
+                    }
+                  );
 
-              const verifyResponse = await axiosInstance.post("/admincode", {
-                userInsert,
-              });
-
-              if (
-                verifyResponse.status === 200 ||
-                verifyResponse.status === 201
-              ) {
-                return "admin";
-              } else {
-                throw new Error(verifyResponse?.data?.message || "Код қате");
-              }
-            }
-          } catch (err) {
-            throw err;
+                  if (
+                    verifyResponse.status === 200 ||
+                    verifyResponse.status === 201
+                  ) {
+                    return "admin";
+                  } else {
+                    throw new Error(
+                      verifyResponse?.data?.message || "Код қате"
+                    );
+                  }
+                }}
+              />
+            );
           }
         }
         return value;
@@ -93,13 +105,15 @@ export default function Register() {
           Тіркелу бар ?{" "}
           <Link
             to="/login"
-            className="text-quaternary-blue hover:text-secondary-blue">
+            className="text-white-blue hover:text-secondary-blue">
             Кіру
           </Link>
         </p>
       ),
     },
   ]);
+
+  const [prompt, setPrompt] = useState(null);
 
   const handleOnSuccess = async (response) => {
     navigate("/login");
@@ -115,6 +129,7 @@ export default function Register() {
   }, []);
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-white">
+      {prompt && prompt}
       <AutoForm
         title="Тіркелу"
         className="flex flex-col items-center justify-center w-full max-w-md bg-tertiary-blue rounded-4xl p-3 shadow-md "
