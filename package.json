@@ -15,7 +15,8 @@
     "build-and-dev":"cd frontend && npm i && npm run build && cd .. && cd backend && npm run dev",
     "dev-double-mac":"cd frontend && open -a Terminal 'npm run dev' && cd ../backend && npm run dev",
     "dev-double-windows":"cd frontend && start cmd /k npm run dev && cd ../backend && npm run dev",
-    "for-render-server":"node configerForRender.js && npm run build-and-run",
+    "build-and-run-for-render-server":"cd frontend && npm i && npm run build-linux && cd .. && cd backend && npm run start",
+    "for-render-server":"node configerForRender.js && npm run build-and-run-for-render-server",
     "make-crit":"cd backend && node src/utils/makeSecrit.js"
   },
   "keywords": [],

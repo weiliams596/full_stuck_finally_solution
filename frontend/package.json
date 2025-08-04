@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build  && echo 'Build complete!' && xcopy dist ..\\backend\\public /E /H /C /I /Y && echo 'Copied to backend/public folder!'",
+    "build-linux":"vite build && echo 'Build complete!' && cp -r dist/* ../backend/public/ && echo 'Copied to backend/public folder!'",
     "lint": "eslint .",
     "preview": "vite preview"
   },
