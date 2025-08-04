@@ -11,7 +11,7 @@ const backendFile = path.join(backendDir, fileName)
 const frontendFile = path.join(frontendDir, fileName)
 
 
-const backendEnvContent = String.row`
+const backendEnvContent = String.raw`
 DB_CONNECTED=postgresql://full_stuck_final_db_user:ytI3D0a5EBnNRkUidtCbYBYBB9kkOcZY@dpg-d287ipripnbc739ei5hg-a.oregon-postgres.render.com/full_stuck_final_db
 JSON_SECRET=$2b$10$FVV6V0aMZZ5eK7ChUaZse.CIIManVtjAIRmLv/.bIow1RGstWRpSi
 REFRESH_SECRET=$2b$10$kULS9jGU7oOB00d3WlTWW.Z/iJOT/d.2RI2vaPrNWrZ5RtDby/amK
@@ -19,7 +19,7 @@ NODE_ENV=development
 PORT=5000
 `;
 
-const frontendEnvContent = String.row`
+const frontendEnvContent = String.raw`
 VITE_BASE_URL=http://localhost:5000
 VITE_BASE_API_PATH=/api/v1`;
 
