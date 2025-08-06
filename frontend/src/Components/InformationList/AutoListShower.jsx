@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import SetContext from "../Contexts/SetContexts/SetContext";
 import AuthContext from "../Contexts/Auth/AuthContext";
+import ErrorShower from "../Form/ErrorShower";
 
 /**
  * This component is used to show the list of data from the server.
@@ -10,32 +11,38 @@ import AuthContext from "../Contexts/Auth/AuthContext";
  * @param {Function(Object,Number)} props.template.builder - function to build the data(item,index)
  * @param {String} props.active - active url
  * @param {Array} props.listData - data array
+ * @param {async Function} props.onError - async function to handle error(params: error)
+ * @param {async Function} props.onSuccess - async function to handle success(params: data)
  * @returns {JSX.Element}
  */
 
 export default function AutoListShower({
   className = "",
-  template = null,
+  template,
   active = null,
   listData = null,
+  onError,
+  onSuccess,
 }) {
-  const [error, setError] = useState(null);
-  const { axiosInstance } = useContext(SetContext);
+  const { axiosInstance, error, setError } = useContext(SetContext);
   const { auth } = useContext(AuthContext);
   const [data, setData] = useState([]);
-  const [showData, setShowData] = useState([]);
 
   const fetchData = async () => {
     try {
-      const response = await axiosInstance.get(active, { id: auth.id });
+      const response = await axiosInstance.get(active, {
+        params: { id: auth.id },
+      });
       if (response.status === 200 || response.status === 201) {
         setData(response.data);
       } else {
         throw new Error("AutoListShower : Шақыру қате");
       }
+      await onSuccess?.(response.data);
     } catch (e) {
-      console.log(e);
-      setError(e);
+      const newError = await onError?.(e);
+      console.log(newError);
+      setError(newError);
     }
   };
 
@@ -44,24 +51,37 @@ export default function AutoListShower({
     if (active) {
       fetchData();
     }
+  }, [listData, active]);
+
+  useEffect(() => {
     if (data && data.length > 0) {
       let index = 0;
-      const showDatas = [];
+      const temptShowDatas = [];
       data.map((item) => {
         const obj = {};
-        if (template) {
+        if (typeof template.builder === "function") {
           for (const key in template) {
-            obj[key] = data[key] ?? template[key];
+            if (key !== "builder") obj[key] = item[key] ?? template[key];
           }
-          showDatas.push(template.builder(obj,index));
+          temptShowDatas.push(template.builder(obj, index));
           index++;
           return obj;
         }
       });
-      setShowData(showDatas);
     }
-  }, []);
-  return <div className={className ?? "flex flex-col mt-2 mb-2 h-full w-full"}>
-    {showData}
-  </div>;
+  }, [data]);
+
+  return (
+    <div className={className ?? "flex flex-col mt-2 mb-2 h-full"}>
+      {!error &&
+        data?.map((item, index) => {
+          const obj = { id: item.id };
+          for (const key in template) {
+            if (key !== "builder") obj[key] = item[key] ?? template[key];
+          }
+          return template.builder(obj, index);
+        })}
+      {error && <ErrorShower timer={5000} className="text-red-500" />}
+    </div>
+  );
 }

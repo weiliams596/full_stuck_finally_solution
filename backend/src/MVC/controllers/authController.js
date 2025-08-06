@@ -1,11 +1,12 @@
 const bcrypt = require('bcrypt');
 
-const { User,Doctor } = require('../models/index');
+const { User } = require('../models/index');
 
 const Response = require('../../utils/Response');
 const makeSecret = require('../../utils/makeSecret');
 const { makeToken, verifyToken } = require('../../utils/tokenTools');
 const JoiSchema = require('../../utils/joiSchemaFunc');
+
 
 let hashCode = "";
 let timerIntralHandle = null;
@@ -38,36 +39,23 @@ const authController = {
      */
     async register(req, res) {
         try {
-            const { error } = JoiSchema.registerSchema.validate(req.apiQuery,{abortEarly: false});
+            const { error } = JoiSchema.registerSchema.validate(req.apiQuery, { abortEarly: false });
             if (error) {
                 return res.status(400).json(Response(400, error.details[0].message));
             }
-            const { email } = req.apiQuery;
-            console.log(email);
+            const { username, email, password, role } = req.apiQuery;
             const user = await User.findOne({ where: { email } });
             if (user) {
                 return res.status(400).json(Response(400, `${email} дерек қорында бар!`));
             }
-
-            let keys = Object.keys(req.apiQuery);
-            let values = Object.values(req.apiQuery);
-            let obj = {};
-            for (let i = 0; i < keys.length; i++) {
-                if (keys[i] === "password") {
-                    obj[keys[i]] = makeSecret(values[i]);
-                    continue;
-                } else if (keys[i] === "confirmPassword") {
-                    continue;
-                }
-                obj[keys[i]] = values[i];
-            }
+            const hashedPassword = await makeSecret(password);
             const newUser = await User.create({
-                ...obj,
+                email: email.toLowerCase(),
+                username: username,
+                password: hashedPassword,
+                role: role,
+                status: role === 'admin' || role === 'iller' ? 'active' : 'inactive'
             });
-            if (newUser.role === 'iller' || newUser.role === 'admin') {
-                newUser.status = 'active';
-                await newUser.save();
-            }
             console.log(req.apiQuery);
             return res.status(201).json({
                 message: 'Құрылғаны қабылданды!'
@@ -89,7 +77,7 @@ const authController = {
      */
     async login(req, res) {
         try {
-            const { error } = JoiSchema.loginSchema.validate(req.apiQuery,{abortEarly: false});
+            const { error } = JoiSchema.loginSchema.validate(req.apiQuery, { abortEarly: false });
             if (error) {
                 return res.status(400).json(Response(400, error.details[0].message));
             }
@@ -100,14 +88,6 @@ const authController = {
             }
             if (user.status === 'deleted') {
                 return res.status(404).json(Response(404, `${email} жойылған!`));
-            }
-            let isComplate = false;
-            const doctor = await Doctor.findOne({ where: { user_id: user.id } });
-            if (doctor) {
-                if (doctor.status === 'deleted') {
-                    return res.status(404).json(Response(404, `${email} жойылған!`));
-                }
-                isComplate = true;
             }
             const isMatch = await bcrypt.compare(password, user.password);
             if (!isMatch) {
@@ -120,7 +100,6 @@ const authController = {
             res.header('Authorization', `Bearer ${accessValue}`);
             res.cookie('refresh_token', refreshValue, refreshOption);
             res.cookie('access_token', accessValue, accessOption);
-            console.log(req.apiQuery);
             return res.status(200).json({
                 message: 'Сәтті тіркелді!',
                 user: {
@@ -128,7 +107,6 @@ const authController = {
                     username: user.username,
                     role: user.role,
                     status: user.status,
-                    registed: isComplate,
                 },
             });
         } catch (err) {
@@ -194,24 +172,32 @@ const authController = {
     async admincode(req, res) {
         try {
             const { userInsert } = req.apiQuery;
-            if (userInsert !== hashCode) {
-                if (hashCode == '') {
-                    hashCode = makeSecret('admin').trim();
+            if (hashCode !== '') {
+                if (userInsert !== hashCode && userInsert !== 'init') {
+                    return res.status(400).json(Response(400, 'Администратор кодын қате еңгізіңіз!'));
+                }
+                else if (userInsert === hashCode) {
+                    hashCode = '';
                     if (timerIntralHandle)
                         clearInterval(timerIntralHandle);
-                    timerIntralHandle = setInterval(() => {
-                        hashCode = '';
-                        clearInterval(timerIntralHandle);
-                    }, 15 * 60 * 1000);
+                    return res.status(200).json({ message: 'Сәтті болды!' })
                 }
-                console.log('admin code:\n', hashCode);
-                return res.status(200).json({ message: 'Администратор код жасалды! 15 минут уақыт кұттесіз!' })
+                else {
+                    return res.status(200).json({ message: 'Сәтті болды!' })
+                }
             }
             else {
-                console.log(userInsert);
-                res.status(200).json({ isValid: userInsert == hashCode });
-                return hashCode = '';
+                hashCode = makeSecret('admin').trim();
+                if (timerIntralHandle)
+                    clearInterval(timerIntralHandle);
+                timerIntralHandle = setInterval(() => {
+                    hashCode = '';
+                    clearInterval(timerIntralHandle);
+                }, 15 * 60 * 1000);
             }
+            console.log('admin code:\n', hashCode);
+            return res.status(200).json({ message: 'Администратор код жасалды! 15 минут уақытқа күшке ие!' })
+
         } catch (err) {
             console.log(err);
             return res.status(500).json(Response(500, err.message));
@@ -223,73 +209,6 @@ const authController = {
             return res.status(200).json({ message: 'Сәтті шықтыңыз!' });
         } catch (e) {
             return res.status(500).json(Response(500, 'Жүйеден шығу шақыру қатеболды!'));
-        }
-    },
-    /**
-     * @api {get} /api/v1/getInactiveUsers  Актив болғандар функция
-     * @apiName getInactiveUsers
-     * @apiGroup Auth
-     * @apiDescription Актив болмағандарды қайтару
-     * @apiParam {Number} id Администраторның ID
-     * @apiSuccess {String} message Сәтті өзгерылды!
-     * @apiError {Number} code 403 Сізде рұқсат жоқ!
-     * @apiError {Number} code 500 Актив болғандарды қайтару қатеболды!
-     */
-    async getInactiveUsers(req, res) {
-        try {
-            const { id } = req.apiQuery;
-            const admin = await User.findByPk(id);
-            if (!admin.role === 'admin') {
-                return res.status(403).json(Response(403, 'Сізде рұқсат жоқ!'));
-            }
-            const users = await User.findAll({ where: { status: 'inactive' } });
-            let inactiveUsers = [];
-            users.map(usr => {
-                inactiveUsers.push({
-                    id: usr.id,
-                    username: usr.username,
-                    role: usr.role,
-                    status: usr.status,
-                });
-            });
-            return res.status(200).json({ message: 'Актив болмағандар сәтті қайтарылды!', inactiveUsers });
-        } catch (e) {
-            console.log(e);
-            return res.status(500).json(Response(500, 'Актив болғандарды қайтару қатеболды!'));
-        }
-    },
-    /**
-     * @api {post} /api/v1/activeUser  Активы функция
-     * @apiName activeUser
-     * @apiGroup Auth
-     * @apiDescription Қолданушы активация 
-     * @apiParam {Number} user_id Қолданушының ID
-     * @apiParam {Number} id Администраторның ID
-     * @apiSuccess {String} message Сәтті активы болды!
-     * @apiError {Number} code 401 Қате бағдарлама!
-     * @apiError {Number} code 403 Сізде рұқсат жоқ!
-     * @apiError {Number} code 404 Табылмады!
-     * @apiError {Number} code 500 Активация қатеболды!
-     */
-    async activeUser(req, res) {
-        try {
-            const { user_id, id } = req.apiQuery;
-            if (!user_id || !id) {
-                return res.status(401).json(Response(401, 'Қате бағдарлама!'));
-            }
-            const admin = await User.findOne({ where: { id } });
-            if (!admin.role === 'admin') {
-                return res.status(403).json(Response(403, 'Сізде рұқсат жоқ!'));
-            }
-            const user = await User.findOne({ where: { id: user_id } });
-            if (!user) {
-                return res.status(404).json(Response(404, 'Табылмады!'));
-            }
-            user.status = 'active';
-            await user.save();
-            return res.status(200).json({ message: 'Сәтті активы болды!' });
-        } catch (e) {
-            console.log(e);
         }
     },
 };

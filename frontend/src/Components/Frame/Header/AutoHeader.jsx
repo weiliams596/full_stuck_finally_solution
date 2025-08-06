@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 import listIcon from "../../../assets/list.svg";
 
@@ -20,33 +20,27 @@ export default function Header({
   const [windowWith, setWindowWith] = useState(window.innerWidth);
   const [shower, setShower] = useState(false);
   const [headerContent, setHeaderContent] = useState(null);
+  const location = useLocation();
 
-  window.addEventListener("resize", () => {
-    setWindowWith(window.innerWidth);
-  });
   const makeMobile = () => {
     if (fields && windowWith < 769) {
       return (
-        <div className="flex flex-row justify-around items-center w-full h-full">
-          {() => {
-            if ((fields.length > 0)) {
-              fields.forEach((field) => {
-                if (field.to == "/") {
-                  return (
-                    <Link
-                      to={field.to}
-                      className={
-                        field.className
-                          ? field.className
-                          : defaultFiledTextCalssName
-                      }>
-                      {field.component}
-                    </Link>
-                  );
-                }
-              });
-            }
-          }}
+        <div className="flex flex-row justify-around items-center w-full h-full shadow-2xs">
+          {fields.length > 0 &&
+            fields
+              .filter((field) => field.to === "/home" || field.to === "/admin")
+              .map((field, index) => (
+                <Link
+                  key={"mobile_" + index}
+                  to={field.to}
+                  className={
+                    field.className
+                      ? field.className
+                      : defaultFiledTextCalssName
+                  }>
+                  {field.component}
+                </Link>
+              ))}
           {!shower && (
             <div className="flex" onClick={() => setShower(true)}>
               <img src={listIcon} alt="menu" className="w-6 h-6" />
@@ -56,6 +50,7 @@ export default function Header({
       );
     }
   };
+
   const makeDesktop = () => {
     return (
       fields &&
@@ -78,44 +73,37 @@ export default function Header({
     } else {
       setHeaderContent(makeDesktop());
     }
-  }, [window]);
+  }, [windowWith, location.pathname]);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWith(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
-    <header className={className + " relative"}>
-      {!shower && headerContent && headerContent}
-      {shower && (
-        <div className="flex flex-col justify-around h-[80vh] absolute top-0 right-[-20px] w-[25%] z-100 m-6 bg-tertiary-blue">
-          <button className="" onClick={() => setShower(false)}>            
-            X          </button>
-          {fields &&
-            fields.map((field, index) => {
-              return field.to !== "/" ? (
-                <Link
-                  key={"a_" + index}
-                  to={field.to}
-                  className={
-                    field.className
-                      ? field.className + " mt-2 "
-                      : defaultFiledTextCalssName + " mt-2 "
-                  }>
-                  {field.component}
-                </Link>
-              ) : (
-                <Link
-                  key={"a_" + index}
-                  to={field.to}
-                  className={
-                    field.className
-                      ? field.className + " mt-2 "
-                      : defaultFiledTextCalssName + " mt-2 "
-                  }>
-                  Басты бет
-                </Link>
-              );
-            })}
-        </div>
-      )}
-    </header>
-  );
+  <header className={className + " relative"}>
+    {!shower && (
+      windowWith < 768 ? makeMobile() : makeDesktop()
+    )}
+    {shower && (
+      <div className="flex flex-col justify-around h-[80vh] absolute top-0 right-[-20px] w-[125px] z-100 m-6 bg-primary-blue rounded-4xl">
+        <button className="" onClick={() => setShower(false)}>X</button>
+        {fields.map((field, index) => (
+          <Link
+            key={"a_" + index}
+            to={field.to}
+            className={
+              (field.className || defaultFiledTextCalssName) + " mt-2 ml-[15px]"
+            }>
+            {field.to === "/home" ? "Басты бет" : field.component}
+          </Link>
+        ))}
+      </div>
+    )}
+  </header>
+);
+
 }
 
 export const defaultHeaderClassName =

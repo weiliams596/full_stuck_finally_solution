@@ -5,9 +5,9 @@ const frontendQuery = (req, res, next) => {
         ...req.body,
         ...req.params,
     };
-    if(Object.keys(req.apiQuery).length === 0){
-        return res.status(400).json({ message: "Сураніста бағдарлама жоқ!",code:400 });
-    }
+    // if(Object.keys(req.apiQuery).length === 0){
+    //     return res.status(400).json({ message: "Сураніста бағдарлама жоқ!",code:400 });
+    // }
     next();
 };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useContext } from "react";
 import AuthContext from "../Contexts/Auth/AuthContext";
 import SetContext from "../Contexts/SetContexts/SetContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 /**
  * This hook is used to refresh the token every 15 minutes.
@@ -11,8 +11,9 @@ import { useNavigate } from "react-router-dom";
 
 export function useHeartBeat(interval = 15 * 60 * 1000) {
   const [authStatues, setAuthStatues] = useState("idle");
+  const location = useLocation();
   const { setAuth, setToken, token } = useContext(AuthContext);
-  const { axiosInstance, setHeaderDom, setFooterDom } = useContext(SetContext);
+  const { axiosInstance} = useContext(SetContext);
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -28,15 +29,20 @@ export function useHeartBeat(interval = 15 * 60 * 1000) {
         navigate("/login");
         throw new Error(response.data.message || "Token жаңалау қате!");
       }
+      if(!response?.headers?.authorization?.split(' ')[1]){
+        setToken(null);
+        setAuth(null);
+        return ;
+      }
       setToken(response?.headers?.authorization?.split(" ")[1]);
       setAuth(response?.data?.user);
       setAuthStatues("success");
       console.log("Token жаңалау сәтті болды!");
-      if (window.location.pathname === "/login") {
-        navigate("/");
+      if (location.pathname === "/login") {
+        navigate("/home");
       }
-      if (window.location.pathname === "/register") {
-        navigate("/");
+      if (location.pathname === "/register") {
+        navigate("/home");
       }
     } catch (error) {
       setAuthStatues("error");

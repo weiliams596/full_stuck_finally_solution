@@ -1,4 +1,4 @@
-import React, { use, useContext ,useEffect} from "react";
+import React, { use, useContext, useEffect } from "react";
 
 import AutoForm from "../../Components/Form/AutoForm";
 import AuthContext from "../../Components/Contexts/Auth/AuthContext";
@@ -12,14 +12,17 @@ import { useNavigate } from "react-router-dom";
  */
 
 export default function Login() {
-  const { auth, setAuth, token, setToken } = useContext(AuthContext);
-  const {setHeaderDom,setFooterDom} = useContext(SetContext);
+  const { auth, setAuth, setToken, authLogin, setAuthLogin } =
+    useContext(AuthContext);
+  const { setHeader, setFooterDom } = useContext(SetContext);
   const navigate = useNavigate();
   const handleOnSuccess = async (response) => {
-    setAuth(await response.data.user);
+    setAuthLogin(true);
+    setAuth(response.data.user);
     console.log(auth);
+    console.log(authLogin);
     setToken(response.headers.authorization.split(" ")[1]);
-    navigate("/");
+    navigate("/home");
   };
 
   const handleOnError = async (error) => {
@@ -42,18 +45,32 @@ export default function Login() {
       required: true,
     },
     {
-      name:'other',
-      type:'other',
-      options:(
-        <p>Тіркелу жоқ ? <Link to="/register" className="text-quaternary-blue hover:text-secondary-blue">Тіркелу</Link></p>
-      )
-    }
+      name: "other",
+      type: "other",
+      options: (
+        <p>
+          Тіркелу жоқ ?{" "}
+          <Link
+            to="/register"
+            className="text-quaternary-blue hover:text-secondary-blue">
+            Тіркелу
+          </Link>
+        </p>
+      ),
+    },
   ];
 
   useEffect(() => {
-    setHeaderDom(null);
+    setHeader("Login", null);
     setFooterDom(null);
-  },[]);
+  }, []);
+
+  useEffect(()=>{
+    if(authLogin===true){
+      navigate("/home");
+    }
+  },[authLogin]);
+
   return (
     <div className="flex justify-center items-center h-full w-full bg-white">
       <AutoForm

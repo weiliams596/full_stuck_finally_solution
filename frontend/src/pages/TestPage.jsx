@@ -18,10 +18,10 @@ import AutoListShower from "../Components/InformationList/AutoListShower";
  */
 
 export default function TestPage({ children }) {
-  const { setHeaderDom, setFooterDom } = useContext(SetContext);
+  const { setHeader, setFooterDom } = useContext(SetContext);
   const headerFields = [
     {
-      to: "/",
+      to: "/home",
       component: <img src={logo} />,
     },
     {
@@ -29,7 +29,7 @@ export default function TestPage({ children }) {
       component: "Докторлар",
     },
     {
-      to: "/about",
+      to: "/home/about",
       component: "Бізге қатысты",
     },
   ];
@@ -46,10 +46,10 @@ export default function TestPage({ children }) {
     },
   };
   useEffect(() => {
-    setHeaderDom(<AutoHeader fields={headerFields} />);
+    setHeader('TestPage',<AutoHeader fields={headerFields} />);
     setFooterDom(<AutoFooter>footer</AutoFooter>);
     return () => {
-      setHeaderDom(null);
+      setHeader('TestPage',null);
       setFooterDom(null);
     };
   }, []);

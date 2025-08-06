@@ -107,7 +107,7 @@ router.post('/refresh-token', rateLimit(20, 60 * 20), authController.refreshToke
  *       200:
  *         description: Жаңарту сәтті өтті
  */
-router.post('/admincode', rateLimit(20, 60 * 20), authController.admincode);
+router.post('/admincode', rateLimit(100, 60 * 20), authController.admincode);
 
 /**
  * @swagger
@@ -130,18 +130,5 @@ router.post('/admincode', rateLimit(20, 60 * 20), authController.admincode);
  */
 router.post('/logout', rateLimit(1, 60 * 20), authController.logout);
 
-/**
- * @swagger
- * /active-user:
- *   post:
- *     tags: [Auth]
- *     summary: Активациялау
- *     description: Активациялау үшін қолданушының активсін жасау
- *     operationId: activeUser
- */
-router.post('/active-user', rateLimit(100, 60), authController.activeUser);
-
-
-router.get('/inactive-users', rateLimit(100, 60), authController.getInactiveUsers);
 
 module.exports = router;

@@ -46,7 +46,15 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'doctors',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['user_id'] },
+            { fields: ['hospital_id'] },
+            { fields: ['work_status'] }
+        ]
+
     });
 
     Doctor.associate = models => {

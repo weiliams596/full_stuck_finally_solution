@@ -4,7 +4,7 @@ require('dotenv').config();
 const sequelize = new Sequelize(process.env.DB_CONNECTED, {
   dialect: 'postgres',
   protocol: 'postgres',
-  logging: false, // 可选：关闭 SQL 日志
+  logging: false, 
   dialectOptions: {
     ssl: {
       require: true,

@@ -1,46 +1,59 @@
 import React, { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 import AuthContext from "../Contexts/Auth/AuthContext";
+import SetContext from "../Contexts/SetContexts/SetContext";
+import AnimationDom from "../AnimationDom/AnimationDom";
+
+import { useHeartBeat } from "../Hooks/useHeartBeat";
 
 export default function Frame({
   headerDom = null,
   footerDom = null,
   children,
 }) {
-  const { auth ,dataAlrady} = useContext(AuthContext);
+  const { auth, authLogin } = useContext(AuthContext);
+  const { axiosLoading } = useContext(SetContext);
+  const heartBeat = useHeartBeat();
   const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
-    console.log(auth);
-    if (auth?.role === "admin") {
-      navigate("/admin");
-    }
-    if(auth?.role === "doctor" && auth?.registed){
-      navigate("/doctor-home");
-    }
-  }, [dataAlrady]);
+    if (authLogin === true)
+      if (auth) {
+        if (auth.role === "admin") {
+          if (location.pathname.includes("/admin")) return;
+          navigate("/admin");
+        } else if (auth.role === "doctor" && auth?.status === "active") {
+          if (location.pathname.includes("/doctor-home")) return;
+          navigate("/doctor-home");
+        } else {
+          if (location.pathname.includes("/home")) return;
+          navigate("/home");
+        }
+      }
+  }, [auth, authLogin]);
 
   useEffect(() => {
-    const pathName = window.location.pathname;
+    if (authLogin !== true) {
+      if (location.pathname === "/login" || location.pathname === "/register")
+        return;
+      navigate("/login");
+    }
+    if (auth?.status === "inactive") {
+      navigate("/invaliduser");
+    }
+    const pathName = location.pathname;
     if (pathName === "/login" || pathName === "/register") {
       return;
     }
-    if (!auth) {
-      navigate("/login");
-    }
-    if(!auth?.registed && auth?.role === "doctor"){
-      navigate("/doctor-register");
-    }
-    if(auth?.status === "inactive"){
-      navigate("/invaliduser");
-    }
-  }, [window.location.pathname,dataAlrady]);
+  }, [location.pathname, auth, authLogin]);
 
   return (
     <div className="relative w-screen h-screen bg-tertiary-blue ">
       {headerDom && headerDom}
-      <div className="absolute top-[130px] left-[20px] z-3 rounded-4xl bg-white  overflow-y-scroll hide-scrollbar content-show-style shadow-md h-max-full w-max-full">
-        <div className="object-cover p-[20px] h-full w-full text-center">
+      <div className="absolute top-[130px] left-[20px] z-3 rounded-4xl bg-white  overflow-y-scroll hide-scrollbar content-show-style shadow-md">
+        {axiosLoading && <AnimationDom />}
+        <div className="object-cover p-[20px] h-full w-full text-center rounded-4xl justify-center items-center child-show-style">
           {children}
         </div>
       </div>

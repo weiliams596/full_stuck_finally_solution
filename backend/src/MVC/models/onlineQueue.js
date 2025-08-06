@@ -50,8 +50,15 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         tableName: 'online_queue',
         timestamps: true,
-        createdAr: 'created_at',
-        updatedAt: 'updated_at'
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['iller_id'] },
+            { fields: ['doctor_id'] },
+            { fields: ['status'] }
+        ]
     });
 
     OnlineQueue.associate = (models) => {

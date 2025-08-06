@@ -5,14 +5,14 @@ import AutoHeader from "../Frame/Header/AutoHeader";
 import HomeLogo from "../Frame/Header/HomeLogo";
 
 export default function ShowNowQueue() {
-  const { setHeaderDom, setFooterDom } = useContext(SetContext);
+  const { setHeader, setFooterDom } = useContext(SetContext);
 
   useEffect(() => {
-    setHeaderDom(
+    setHeader('ShowNowQueue',
           <AutoHeader
             fields={[
               {
-                to: "/",
+                to: "/home",
                 component: (
                   <HomeLogo/>
                 ),

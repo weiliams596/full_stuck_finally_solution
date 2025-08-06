@@ -45,7 +45,14 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'real_time_queue',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['comment_id'], unique: true },
+            { fields: ['queue_code'] },
+            { fields: ['queue_status'] }
+        ]
     });
 
     RealTimeQueue.associate = (models) => {

@@ -9,19 +9,17 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true
         },
         username: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(50),
             allowNull: false
         },
         email: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(100),
             allowNull: false,
             unique: true,
-            validate: {
-                isEmail: true
-            }
+            validate: { isEmail: true }
         },
         password: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(255),
             allowNull: false
         },
         role: {
@@ -30,12 +28,12 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'iller'
         },
         image: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(255),
             allowNull: false,
             defaultValue: 'default.jpg'
         },
         status: {
-            type: DataTypes.ENUM('active', 'inactive', 'deleted'),
+            type: DataTypes.ENUM('active', 'inactive'),
             allowNull: false,
             defaultValue: 'inactive'
         },
@@ -48,21 +46,15 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'users',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['email'], unique: true },
+            { fields: ['status'] },
+            { fields: ['role'] }
+        ]
     });
 
-    User.associate = (models) => {
-        User.hasOne(models.Doctor, {
-            foreignKey: 'user_id',
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        });
-        User.hasOne(
-            models.Patient, {
-            foreignKey: 'user_id',
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE'
-        });
-    }
     return User;
 };

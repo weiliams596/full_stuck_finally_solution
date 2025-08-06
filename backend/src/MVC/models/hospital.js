@@ -12,6 +12,14 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        code: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                is: /^[A-Z0-9]{4,10}$/i,
+            },
+        },
         address: {
             type: DataTypes.STRING,
             allowNull: false
@@ -20,8 +28,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
-        description:{
-            type: DataTypes.STRING,
+        description: {
+            type: DataTypes.TEXT,
             allowNull: false
         },
         deleted_at: {
@@ -33,7 +41,13 @@ module.exports = (sequelize, DataTypes) => {
         tableName: 'hospitals',
         timestamps: true,
         createdAt: 'created_at',
-        updatedAt: 'updated_at'
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['code'], unique: true },
+            { fields: ['city'] }
+        ]
     });
 
     Hospital.associate = (models) => {

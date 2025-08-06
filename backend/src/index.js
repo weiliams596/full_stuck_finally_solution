@@ -11,6 +11,7 @@ const sequelize = require('./Config/db');
 const swaggerJsdoc = require('./utils/swagger');
 
 const authRouter = require('./routes/authRoutes');
+const adminRouter = require('./routes/adminRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -29,6 +30,7 @@ app.use(cookieParser());
 
 app.use('/api-docs', swaggerui.serve, swaggerui.setup(swaggerJsdoc));
 app.use('/api/v1', authRouter);
+app.use('/api/v1', adminRouter);
 
 app.listen(port, () => {
   sequelize.sync({ force: true ,alter: true }).then((sq) => {

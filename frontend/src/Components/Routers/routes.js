@@ -1,24 +1,38 @@
 import Register from '../../pages/Auth/Register';
-import Notfund from '../../pages/Notfund';
 import Login from '../../pages/Auth/Login';
-import TestPage from '../../pages/TestPage';
+
+import HomePage from '../../pages/Patient/HomePage';
 import InvalidUser from '../../pages/InvalidUser';
-import HomePage from '../../pages/HomePage';
 import AllFunctions from '../Home/AllFunctions';
 import ShowNowQueue from '../Home/ShowNowQueue';
-import DoctorRegister from '../../pages/Auth/DoctorRegister';
+
+import DoctorRegister from '../../pages/Doctor/DoctorRegister';
+
+import AdminHome from '../../pages/Admin/AdminHome';
+import ControlHospital from '../../pages/Admin/ControlHospital';
+import ControlUsers from '../../pages/Admin/ControlUsers';
+
+import TestPage from '../../pages/TestPage';
 
 import AboutUs from '../../pages/AboutUs';
-
+import Notfund from '../../pages/Notfund';
 const routes = [
     {
-        path: '/',
+        path: '/home',
         element : HomePage,
         Children:[
             {path:0, element: AllFunctions},
             {path:'real-time-queue' , element: ShowNowQueue},
             {path:'about',element:AboutUs}
         ]
+    },
+    {
+        path: '/admin',
+        element: AdminHome,
+        Children:[
+            {path:'hospital-control',element:ControlHospital},
+            {path:'user-control',element:ControlUsers},
+        ],
     },
     {
         path:'/invaliduser',

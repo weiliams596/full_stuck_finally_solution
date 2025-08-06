@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         real_time_queue_id:{
             type: DataTypes.INTEGER,
-            allowNull: false,
+            allowNull: true,
             references: {
                 model: 'real_time_queue',
                 key: 'id'
@@ -40,17 +40,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             validate: {
                 isInt: {
-                    msg: "Comment point must be an integer"
+                    msg: "Бағалау балл integer болуы керек"
                 },
                 min: 0,
                 max: 5
             },
             allowNull: false
-        },
-        status: {
-            type: DataTypes.ENUM('active', 'deleted'),
-            allowNull: false,
-            defaultValue: 'active'
         },
         deleted_at: {
             type: DataTypes.DATE,
@@ -58,7 +53,16 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: null
         }
     }, {
-        tableName: 'comments'
+        tableName: 'comments',
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: 'updated_at',
+        paranoid: true,
+        deletedAt: 'deleted_at',
+        indexes: [
+            { fields: ['author_id'] },
+            { fields: ['doctor_id'] }
+        ]
     });
 
     Comment.associate = (models) => {
